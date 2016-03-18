@@ -4,6 +4,7 @@
   "description": "Basic logic for implementing a match three game.",
   "main": "index.js",
   "dependencies": {
+    "collections": "^3.0.0",
     "lodash": "4.6.1"
   },
   "devDependencies": {
