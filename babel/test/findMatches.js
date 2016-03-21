@@ -2,7 +2,7 @@ import test from 'ava';
 import * as _ from 'lodash';
 import {findMatches} from '../src/board';
 import {Board} from '../src/board';
-let board, exampleMatches, correctMatches;
+let board, exampleMatches, correctMatches, answer;
 
 test.before(() => {
     board = new Board(5, 5);
@@ -42,7 +42,7 @@ test.before(() => {
         [ 4, 5, 6, 2, 3 ],
         [ 3, 4, 6, 1, 2 ],
         [ 2, 3, 6, 5, 1 ]
-    ] [
+    ], [
         [ 1, 2, 3, 4, 5 ],
         [ 5, 1, 6, 3, 4 ],
         [ 4, 6, 6, 6, 3 ],
@@ -60,7 +60,7 @@ test.before(() => {
         [ 6, 6, 6, 6, 3 ],
         [ 3, 4, 6, 1, 2 ],
         [ 2, 3, 6, 5, 1 ]
-    ] [
+    ], [
         [ 1, 2, 3, 4, 5 ],
         [ 5, 1, 2, 3, 4 ],
         [ 4, 6, 6, 6, 6 ],
@@ -74,8 +74,12 @@ test.before(() => {
         [ 2, 3, 6, 5, 1 ]
     ]];
     correctMatches = [
-       [[3, 1], [3, 2], [3, 3]],
-       [[2, 4], [3, 4], [4, 4]],
+       [
+           [[3, 1], [3, 2], [3, 3]]
+       ],
+       [
+           [[2, 4], [3, 4], [4, 4]]
+       ],
        [
            [[4, 1], [4, 2], [4, 3]],
            [[4, 2], [4, 3], [4, 4]]
@@ -118,13 +122,12 @@ test.before(() => {
            [[2, 2], [2, 3], [2, 4]],
            [[2, 2], [3, 2], [4, 2]]
        ]
-       
    ];
 });
 
 test('gathers all matches of three', t => {
-   _.each(_.range(11), i => {
+   _.each(_.range(exampleMatches.length), i => {
        board.orbs = exampleMatches[i];
-       t.is(findMatches(board.orbs), correctMatches[i]);
+       t.true(_.isEqual(findMatches(board.orbs), correctMatches[i]));
    });
 });
