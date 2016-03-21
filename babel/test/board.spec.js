@@ -21,7 +21,7 @@ test('creates seven different types of orbs', t => {
     t.same(board.availableTypes, _.range(7));
 });
 
-test('finds all mathes of three, including overlaps', t => {
+test.skip('finds all mathes of three, including overlaps', t => {
     let testMatches = [
         [ [ 0, 1 ], [ 0, 2 ], [ 0, 3 ] ],
         [ [ 0, 2 ], [ 0, 3 ], [ 0, 4 ] ],
@@ -59,42 +59,6 @@ test('combines all matches of 3 to create matches of 4+', t => {
     ];
 
     t.same(combineMatches(findMatches(board.orbs)), testCombined);
-});
-
-test('gathers data for each match', t=> {
-    board.orbs = [
-        [ 3, 2, 2, 2, 2, 3, 6, 6 ],
-        [ 4, 2, 0, 5, 3, 0, 1, 5 ],
-        [ 1, 4, 3, 2, 5, 4, 6, 6 ],
-        [ 3, 5, 2, 2, 2, 3, 3, 4 ],
-        [ 1, 1, 3, 2, 5, 2, 6, 2 ],
-        [ 3, 2, 5, 4, 5, 0, 4, 0 ],
-        [ 1, 3, 1, 6, 1, 6, 3, 3 ],
-        [ 1, 0, 3, 0, 1, 1, 3, 3 ]
-    ];
-
-    t.same(board.evaluate(combineMatches(findMatches(board.orbs))), [[ 2, 4 ], [ 2, 5 ]]);
-});
-
-test('deletes matches and drops down orbs', t=> {
-    // matches in this test are 8 which are not a part of board.types
-    // this shows that they have been replaced with valid random orbs
-    board.orbs = [
-        [ 3, 8, 8, 8, 8, 3, 6, 6 ],
-        [ 4, 2, 0, 5, 3, 0, 1, 5 ],
-        [ 1, 4, 3, 8, 5, 4, 6, 6 ],
-        [ 3, 5, 8, 8, 8, 3, 3, 4 ],
-        [ 1, 1, 3, 8, 5, 2, 6, 2 ],
-        [ 3, 2, 5, 4, 5, 0, 4, 0 ],
-        [ 1, 3, 1, 6, 1, 6, 3, 3 ],
-        [ 1, 0, 3, 0, 1, 1, 3, 3 ]
-    ];
-    board.evaluate(combineMatches(findMatches(board.orbs)));
-
-    t.same(board.orbs[4][3], 5); // the 5 should always drop down to [4, 3]
-    _.each(_.flattenDeep(board.orbs), orb => {
-        t.true(_.includes(board.types, orb))
-    });
 });
 
 test.skip('should have at least one possible match set by default', t => {

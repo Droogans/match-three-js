@@ -67,15 +67,19 @@ export function iterchunks (orbs, chunkLimitRange = [4, 2]) {
 
 export function findMatches(orbs) {
     let matches = [];
-    let b = orbs;
     let height = orbs.length;
     let width = orbs[0].length;
 
-    _.each(_.range(height - 2), x => {
+    _.each(_.range(height), x => {
         _.each(_.range(width - 2), y => {
-            if (b[x][y] == b[x][y + 1] && b[x][y] == b[x][y + 2]) {
+            if (orbs[x][y] == orbs[x][y + 1] && orbs[x][y] == orbs[x][y + 2]) {
                 matches.push([[x, y], [x, y + 1], [x, y + 2]])
-            } else if (b[x][y] == b[x + 1][y] && b[x][y] == b[x + 2][y]) {
+            };
+        });
+    });
+    _.each(_.range(height - 2), x => {
+        _.each(_.range(width), y => {
+            if (orbs[x][y] == orbs[x + 1][y] && orbs[x][y] == orbs[x + 2][y]) {
                 matches.push([[x, y], [x + 1, y], [x + 2, y]])
             };
         });
