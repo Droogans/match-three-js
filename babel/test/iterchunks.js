@@ -60,7 +60,7 @@ test('has the correct chunk contents', t => {
     t.same(chunks, correctChunks);
 });
 
-test.skip('provides position information', t => {
+test('provides position information', t => {
     let correctChunks = [
         [
             [6, 5, 4, 1],
