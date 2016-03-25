@@ -29,7 +29,7 @@
   "ava": {
     "files": [
       "babel/test/**/*.js",
-      "!babel/test/exampleMatchesData.js"
+      "!babel/test/data/**"
     ],
     "failFast": true,
     "tap": true,
