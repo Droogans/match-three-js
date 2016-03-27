@@ -1,5 +1,5 @@
 // orbs after combineMatches(findMatches(orbs))
-export var testCombined = [
+export var combinedMatches = [
     [
         [[3, 1], [3, 2], [3, 3]]
     ],
@@ -32,5 +32,13 @@ export var testCombined = [
     ],
     [
         [[2, 0], [2, 1], [2, 2], [2, 3], [2, 4], [3, 2], [4, 2]]
+    ],
+    [
+        [[2, 0], [2, 1], [2, 2]],
+        [[3, 0], [3, 1], [3, 2]]
+    ],
+    [
+        [[1, 3], [2, 3], [3, 3], [4, 3]],
+        [[1, 4], [2, 4], [3, 4], [4, 4]]
     ]
 ];

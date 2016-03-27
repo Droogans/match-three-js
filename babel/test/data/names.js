@@ -9,5 +9,7 @@ export var names = [
     'an L cross-match',
     'a four match plus corner match',
     'a four match plus corner match (inverted)',
-    'a seven match'
+    'a seven match',
+    'two matches of three',
+    'two matches of four'
 ];

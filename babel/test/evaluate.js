@@ -2,7 +2,6 @@ import test from 'ava';
 import * as _ from 'lodash';
 import {names} from './data/names';
 import {orbs} from './data/orbs';
-import {combinedMatches} from './data/combinedMatches';
 import {testMatchData} from './data/evaluate';
 import {nonMatchDropped} from './data/evaluate';
 import {droppedRandoms} from './data/evaluate';
