@@ -284,6 +284,18 @@ export class Board {
         return hasWideStyleMatch || _.some(_.map(chunks), hasMatchInPairOfRows);
     }
 
+    swap(swapOrbs) {
+        let [[x1, y1], [x2, y2]] = swapOrbs;
+        let orbsBefore = _.cloneDeep(this.orbs);
+        this.orbs[x1][y1] = orbsBefore[x2][y2]
+        this.orbs[x2][y2] = orbsBefore[x1][y1]
+        
+        // undo the swap if it did not yeild a match
+        if (findMatches(this.orbs)[0] == null) {
+            this.orbs = orbsBefore
+        }
+    }
+
     shuffle() {
 
     }
