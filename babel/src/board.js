@@ -37,6 +37,44 @@ export function hasMatchInPairOfRows (pairOfRows) {
 };
 
 /**
+ * @private
+ * @description Used to provide more granularity to functions that need to call iterchunks
+ * on a non-transposed set of orbs, as well as a transposed set of orbs.
+ * @see findMatches
+ */
+let _iterchunks = (orbs, chunkLimitRange, includePositionInformation, isTransposed) => {
+    let chunks = [];
+    let [width, height] = chunkLimitRange;
+    let [finalPositionWidth, finalPositionHeight] = [orbs[0].length - width, orbs.length - height];
+    _.each(_.range(0, finalPositionHeight + 1), heightIndex => {
+        _.each(_.range(0, finalPositionWidth + 1), widthIndex => {
+            let chunkData = orbs.slice(heightIndex, heightIndex + height).map(row => {
+                return row.slice(widthIndex, widthIndex + width);
+            });
+
+            if (includePositionInformation) {
+                let startingCoordinates = [heightIndex, widthIndex];
+                let endingCoordinates = [heightIndex + height - 1, widthIndex + width - 1];
+                if (isTransposed) {
+                    startingCoordinates = startingCoordinates.reverse();
+                    endingCoordinates = endingCoordinates.reverse();
+                }
+
+                chunkData.push({
+                    position: {
+                        first: startingCoordinates,
+                        last: endingCoordinates
+                    }
+                });
+            }
+
+            chunks.push(chunkData);
+        });
+    });
+    return chunks;
+};
+
+/**
  * With `orbs` being
  * [ [ 6, 5, 4 ],
  *   [ 3, 2, 2 ],
@@ -90,57 +128,54 @@ export function hasMatchInPairOfRows (pairOfRows) {
  * ]
  */
 export function iterchunks (orbs, chunkLimitRange = [4, 2], includePositionInformation = false) {
-    let _iterchunks = (orbs, isTransposed = false) => {
-        let chunks = [];
-        let [width, height] = chunkLimitRange;
-        let [finalPositionWidth, finalPositionHeight] = [orbs[0].length - width, orbs.length - height];
-        _.each(_.range(0, finalPositionHeight + 1), heightIndex => {
-            _.each(_.range(0, finalPositionWidth + 1), widthIndex => {
-                let chunkData = orbs.slice(heightIndex, heightIndex + height).map(row => {
-                    return row.slice(widthIndex, widthIndex + width);
-                });
-
-                if (includePositionInformation) {
-                    let heightCoordinates = [heightIndex + height - 1, widthIndex + width - 1];
-                    let widthCoordinates = [heightIndex, widthIndex];
-                    if (isTransposed) {
-                        widthCoordinates = widthCoordinates.reverse();
-                        heightCoordinates = heightCoordinates.reverse();
-                    }
-
-                    chunkData.push({
-                        position: {
-                            first: widthCoordinates,
-                            last: heightCoordinates
-                        }
-                    });
-                }
-
-                chunks.push(chunkData);
-            });
-        });
-        return chunks;
-    };
     let transposedOrbs = _.zip(...orbs);
-    return [..._iterchunks(orbs, false), ..._iterchunks(transposedOrbs, true)]
+    return [
+            ..._iterchunks(orbs, chunkLimitRange, includePositionInformation, false),
+            ..._iterchunks(transposedOrbs, chunkLimitRange, includePositionInformation, true)
+    ]
+};
+
+let _findMatches = (chunks, isTransposed) => {
+    let matches = [];
+
+    _.each(chunks, chunk => {
+        let orbs = _.first(chunk);
+        let metadata = _.last(chunk);
+        if (_.uniq(orbs).length === 1) {
+            let anchor = metadata.position.first;
+            let firstOrb = anchor;
+            let secondOrb;
+            let thirdOrb;
+
+            if (isTransposed) {
+                secondOrb = [anchor[0] + 1, anchor[1]];
+                thirdOrb = [anchor[0] + 2, anchor[1]];
+            } else {
+                secondOrb = [anchor[0], anchor[1] + 1];
+                thirdOrb = [anchor[0], anchor[1] + 2];
+            }
+
+            let absolutePositions = [
+                firstOrb,
+                secondOrb,
+                thirdOrb
+            ];
+            matches.push(absolutePositions);
+        }
+    });
+
+    return matches;
 };
 
 export function findMatches(orbs) {
-    let matches = [];
-    let b = orbs;
-    let height = orbs.length;
-    let width = orbs[0].length;
+    let chunksOriginal = _iterchunks(orbs, [3, 1], true);
+    let chunksTransposed = _iterchunks(_.zip(...orbs), [3, 1], true, true);
 
-    _.each(_.range(height - 2), x => {
-        _.each(_.range(width - 2), y => {
-            if (b[x][y] == b[x][y + 1] && b[x][y] == b[x][y + 2]) {
-                matches.push([[x, y], [x, y + 1], [x, y + 2]])
-            } else if (b[x][y] == b[x + 1][y] && b[x][y] == b[x + 2][y]) {
-                matches.push([[x, y], [x + 1, y], [x + 2, y]])
-            };
-        });
-    });
-    return matches;
+    return [
+            ..._findMatches(chunksOriginal, false),
+            ..._findMatches(chunksTransposed, true)
+    ];
+
 };
 
 export function combineMatches(matches) {
