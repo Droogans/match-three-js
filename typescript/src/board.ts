@@ -2,9 +2,15 @@
 import * as _ from 'lodash';
 import * as orbs from './orbs';
 import * as triples from './triples';
+import * as types from '../types';
 
 export class Board {
-    constructor (width = 8, height = 8, types = _.range(7), needsAttic = true) {
+    width: number;
+    height: number;
+    types: any[]
+    orbs: any[][];
+    attic: Board;
+    constructor (width: number = 8, height: number = 8, types: any[] = _.range(7), needsAttic: boolean = true) {
         this.width = width;
         this.height = height;
         this.types = types;
@@ -17,58 +23,58 @@ export class Board {
         };
     }
 
-    get size() {
+    get size(): [number, number] {
         return [this.width, this.height];
     }
 
-    get availableTypes() {
+    get availableTypes(): any[] {
         return _.uniq(_.flatten(this.orbs)).sort();
     }
     
-    get triples() {
+    get triples(): types.Coord[][] {
         return triples.find(this.orbs);
     }
     
-    get matches() {
+    get matches(): types.Coord[][] {
         return triples.combine(this.triples);
     }
     
-    generateOrbs() {
+    generateOrbs(): void {
         let chooseOrb = () => { return _.sample(this.types); };
         let sampleRow = () => { return _.times(this.width, chooseOrb); };
         this.orbs = _.zip(..._.times(this.height, sampleRow));
     }
 
-    evaluate() {
-        let [newOrbs, matchData] = orbs.evaluate(this.orbs, this.height, this.width, this.matches, this.attic.orbs);
+    evaluate(): types.MatchData {
+        let [newOrbs, matchData] = orbs.evaluate(this.orbs, this.matches, this.attic.orbs);
         this.orbs = newOrbs;
         return matchData;
 
     }
 
-    needsShuffle() {
+    needsShuffle(): boolean {
         return !this.hasPotentialMatch();
     }
 
-    hasPotentialMatch() {
+    hasPotentialMatch(): boolean {
         return orbs.hasPotentialMatch(this.orbs);
     }
     
-    hasMatch() {
+    hasMatch(): boolean {
         return Boolean(triples.find(this.orbs)[0]);
     }
 
-    swap(swapOrbs) {
+    swap(swapOrbs): void {
         this.orbs = orbs.swap(this.orbs, swapOrbs);
     }
     
-    unmatch() {
+    unmatch(): void {
         while(this.hasMatch()) {
-            this.orbs = orbs.unmatch(this.orbs, this.height, this.width, this.matches[0]);
+            this.orbs = orbs.unmatch(this.orbs, this.matches[0]);
         }
     }
 
-    shuffle() {
+    shuffle(): void {
         this.orbs = _.map(this.orbs, row => _.shuffle(row));
         this.unmatch();
         if (this.needsShuffle()) {

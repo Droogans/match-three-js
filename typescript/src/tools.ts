@@ -1,8 +1,9 @@
 import * as _ from 'lodash';
+import * as types from '../types';
 
 // return the index of all occurrences of `value` in `list`. [5, 3, 7, 5], 5 -> [0, 3]
-export function indexOfAll (list, value) {
-    return _.reduce(list, (acc, e, i) => {
+export function indexOfAll (list: any[], value: any): number[] {
+    return _.reduce(list, (acc: number[], e, i: number) => {
         if (e === value) {
             acc.push(i);
         }
@@ -17,13 +18,13 @@ export function indexOfAll (list, value) {
  * on a non-transposed set of orbs, as well as a transposed set of orbs.
  * @see findTriples
  */
-export function _iterchunks (orbs, chunkLimitRange, includePositionInformation, isTransposed) {
+export function _iterchunks (orbs: any[][], chunkLimitRange: [number, number], includePositionInformation: boolean, isTransposed: boolean): any[][][] | types.IterchunksWithPosition {
     let chunks = [];
     let [width, height] = chunkLimitRange;
     let [finalPositionWidth, finalPositionHeight] = [orbs[0].length - width, orbs.length - height];
     _.each(_.range(0, finalPositionHeight + 1), heightIndex => {
         _.each(_.range(0, finalPositionWidth + 1), widthIndex => {
-            let chunkData = orbs.slice(heightIndex, heightIndex + height).map(row => {
+            let chunkData: any[] = orbs.slice(heightIndex, heightIndex + height).map(row => {
                 return row.slice(widthIndex, widthIndex + width);
             });
 
@@ -102,8 +103,8 @@ export function _iterchunks (orbs, chunkLimitRange, includePositionInformation, 
  *     ]
  * ]
  */
-export function iterchunks (orbs, chunkLimitRange = [4, 2], includePositionInformation = false) {
-    let transposedOrbs = _.zip(...orbs);
+export function iterchunks (orbs: any[][], chunkLimitRange: [number, number] = [4, 2], includePositionInformation = false): any[][][] | types.IterchunksWithPosition[] {
+    let transposedOrbs: any[][] = _.zip(...orbs);
     return [
             ..._iterchunks(orbs, chunkLimitRange, includePositionInformation, false),
             ..._iterchunks(transposedOrbs, chunkLimitRange, includePositionInformation, true)

@@ -1,21 +1,22 @@
 import * as _ from 'lodash';
 import * as tools from './tools';
+import * as types from '../types';
 
 // checks for one row of the iterchunk board for a potential match like [0010].
-export function hasPotentialMatchInSingleRow (row) {
+export function hasPotentialMatchInSingleRow(row: any[]): boolean {
     return _.max(_.values(_.countBy(row))) > 2;
 };
 
 // checks across both rows for a potential match, like [0101]
 //                                                     [2031]
-export function hasPotentialMatchInPairOfRows (pairOfRows) {
-    let allValues = _.uniq(_.flatten(pairOfRows));
-    let allMatches = _.map(allValues, value => {
+export function hasPotentialMatchInPairOfRows(pairOfRows: any[][]): boolean {
+    let allValues: any[] = _.uniq(_.flatten(pairOfRows));
+    let allMatches: number[][] = _.map(allValues, (value: any): number[] => {
         return _.uniq([...tools.indexOfAll(pairOfRows[0], value),
                        ...tools.indexOfAll(pairOfRows[1], value)]).sort();
     });
 
-    return _.some(allMatches, match => {
+    return _.some(allMatches, (match: number[]) => {
         return _.some([
             _.isEqual(match, [0, 1, 2]),
             _.isEqual(match, [1, 2, 3]),
@@ -24,18 +25,18 @@ export function hasPotentialMatchInPairOfRows (pairOfRows) {
     });
 };
 
-export function hasPotentialMatch (orbs) {
-    let chunks = tools.iterchunks(orbs);
+export function hasPotentialMatch(orbs: any[][]): boolean {
+    let chunks: any[][][] = tools.iterchunks(orbs);
     // [[[1, 2, 3], [2, 3, 4]], [[3, 4, 5], [4, 5, 6]]] becomes
     //  [[1, 2, 3], [2, 3, 4], [3, 4, 5], [4, 5, 6]]
-    let flatChunks = _.flattenDepth(chunks, 1);
-    let hasWideStyleMatch = _.some(_.map(flatChunks, hasPotentialMatchInSingleRow));
+    let flatChunks: any[][] = _.flattenDepth(chunks, 1);
+    let hasWideStyleMatch: boolean = _.some(_.map(flatChunks, hasPotentialMatchInSingleRow));
     return hasWideStyleMatch || _.some(_.map(chunks), hasPotentialMatchInPairOfRows);
 };
 
-export function swap(orbs, swapOrbs) {
+export function swap(orbs: any[][], swapOrbs: number[][]): any[][] {
     let [[row1, col1], [row2, col2]] = swapOrbs;
-    let orbsBefore = _.cloneDeep(orbs);
+    let orbsBefore: any[][] = _.cloneDeep(orbs);
     orbs[row1][col1] = orbsBefore[row2][col2]
     orbs[row2][col2] = orbsBefore[row1][col1]
     return orbs;
@@ -62,20 +63,20 @@ export function swap(orbs, swapOrbs) {
   *         [4, 0, 1, 2, 3]                 }
   *     ]
   */
-export function getBlanksBelow(orbs) {
-    let blanksBelow = {};
-    let height = orbs[0].length;
-    let width = orbs.length
+export function getBlanksBelow(orbs: any[][]): { [coord: string]: number } {
+    let blanksBelow: {[coord: string]: number} = {};
+    let height: number = orbs[0].length;
+    let width: number = orbs.length;
     _.each(_.rangeRight(width - 1), row => {
         _.each(_.range(height), col => {
-            let blankCount = 0
+            let blankCount: number = 0
             _.each(_.range(1, height - row), adder => {
                 if (orbs[row + adder][col] === '\u241a') {
                     blankCount += 1;
                 };
             });
             if (blankCount > 0) {
-                blanksBelow[[row, col]] = blankCount;
+                blanksBelow[`${row}, ${col}`] = blankCount;
             };
         });
     });
@@ -87,9 +88,9 @@ export function getBlanksBelow(orbs) {
   * NOTE: The orbs in the top rows that will be replaced with attic.orbs are left unchanged
   * by this function.
   */
-export function activateGravity(orbs) {
+export function activateGravity(orbs: any[][]): any[][] {
     let orbsBefore = _.cloneDeep(orbs);
-    _.each(getBlanksBelow(orbs), (count, coord) => {
+    _.each(getBlanksBelow(orbs), (count: number, coord:string) => {
         let [row, col] = _.map(coord.split(','), _.toInteger);
         orbs[row + count][col] = orbsBefore[row][col];
     })
@@ -102,9 +103,9 @@ export function activateGravity(orbs) {
   *
   * @see releaseAttic
   */
-export function atticOrbsToDropDown(atticOrbs, col, count) {
+export function atticOrbsToDropDown(atticOrbs: any[][], col: string | number, count: number): any[] {
     let lastRow = atticOrbs.length;
-    let atticOrbsToDropDown = [];
+    let atticOrbsToDropDown: any[] = [];
     _.each(_.range(count), n => {
         atticOrbsToDropDown.push(atticOrbs[lastRow - 1 - n][col])
     });
@@ -114,7 +115,7 @@ export function atticOrbsToDropDown(atticOrbs, col, count) {
 /**
   * @description Drops down the necessary orbs from the attic into the main orb set.
   */
-export function releaseAttic(orbs, atticOrbs, orbCounts) {
+export function releaseAttic(orbs: any[][], atticOrbs: any[][], orbCounts: { [col: number]: number }): any[][] {
     _.each(orbCounts, (count, col) => {
         let dropdowns = atticOrbsToDropDown(atticOrbs, col, count);
         _.each(_.range(count), row => {
@@ -131,8 +132,8 @@ export function releaseAttic(orbs, atticOrbs, orbCounts) {
   *
   * @see releaseAttic
   */
-export function getOrbCounts(matches) {
-    let orbCounts = {};
+export function getOrbCounts(matches: number[][][]): { [col: number]: number } {
+    let orbCounts: { [col: number]: number } = {};
     _.each(matches, match => {
         _.each(match, coord => {
             if (orbCounts[coord[1]]) {
@@ -145,8 +146,8 @@ export function getOrbCounts(matches) {
     return orbCounts;
 };
 
-export function getMatchData(orbs, matches) {
-    let matchData = [];
+export function getMatchData(orbs: any[][], matches: number[][][]): types.MatchData {
+    let matchData: types.MatchData = [];
     _.each(matches, match => {
         matchData.push([orbs[match[0][0]][match[0][1]], match.length]);
     })
@@ -157,8 +158,8 @@ export function getMatchData(orbs, matches) {
   * @description Replaces the value of each orb from the matches with a new value
   * of '\u241a'
   */
-export function markMatches(orbs, matches) {
-    let matchData = [];
+export function markMatches(orbs: any[][], matches: number[][][]): any[][] {
+    let matchData: types.MatchData = [];
     _.each(matches, match => {
         _.each(match, coord => {
             let [row, col] = coord;
@@ -187,7 +188,7 @@ export function markMatches(orbs, matches) {
   *                 [3, 4, 0, 1, 2],                [3, 4, 0, 1, 2],    
   *                 [4, 0, 1, 2, 3]                 [4, 0, 1, 2, 3]
   */
-export function evaluate(orbs, height, width, matches, atticOrbs) {
+export function evaluate(orbs: any[][], matches: number[][][], atticOrbs: any[][]): [any[][], types.MatchData] {
     let matchData = getMatchData(orbs, matches);
     orbs = releaseAttic(activateGravity(markMatches(orbs, matches)), atticOrbs, getOrbCounts(matches));
     return [orbs, matchData];
@@ -199,36 +200,27 @@ export function evaluate(orbs, height, width, matches, atticOrbs) {
   * of a different type, or a random orb on the board if there are no valid neighbors.
   * @see unmatch
   */
-let _unmatch = (orbs, row, col, match, skipToRandom = false, height, width) => {
-    let thisOrb = orbs[row][col];
+let _unmatch = (orbs: any[][], row: number, col: number, match: number[][], skipToRandom: boolean = false) => {
+    let thisOrb: any = orbs[row][col];
     let swapped = false;
     let directions = _.shuffle(['up', 'down', 'left', 'right']);
     for (let i = 0; i < 4; i++) {
         // abandons the process and jumps to swapping a random orb
         if (skipToRandom) { break };
         if (directions[i] === 'up' && !_.isUndefined(orbs[row - 1]) && orbs[row - 1][col] !== thisOrb) {
-            swap(orbs, [[row, col], [row - 1, col]], false);
-            swapped = true;
-            break;
+            return swap(orbs, [[row, col], [row - 1, col]]);
         } else if (directions[i] === 'down' && !_.isUndefined(orbs[row + 1]) && orbs[row + 1][col] !== thisOrb) {
-            swap(orbs, [[row, col], [row + 1, col]], false);
-            swapped = true;
-            break;
+            return swap(orbs, [[row, col], [row + 1, col]]);
         } else if (directions[i] === 'left' && !_.isUndefined(orbs[row][col - 1]) && orbs[row][col - 1] !== thisOrb) {
-            swap(orbs, [[row, col], [row, col - 1]], false);
-            swapped = true;
-            break;
+            return swap(orbs, [[row, col], [row, col - 1]]);
         } else if (directions[i] === 'right' && !_.isUndefined(orbs[row][col + 1]) && orbs[row][col + 1] !== thisOrb) {
-            swap(orbs, [[row, col], [row, col + 1]], false);
-            swapped = true;
-            break;
+            return swap(orbs, [[row, col], [row, col + 1]]);
         }
     }
     while (!swapped) {
-        let [randomRow, randomCol] = [_.random(height - 1), _.random(width - 1)];
+        let [randomRow, randomCol] = [_.random(orbs.length - 1), _.random(orbs[0].length - 1)];
         if (!_.includes(match, [randomRow, randomCol]) && orbs[randomRow][randomCol] !== thisOrb) {
-            swap(orbs, [[row, col], [randomRow, randomCol]], false);
-            swapped = true;
+            return swap(orbs, [[row, col], [randomRow, randomCol]]);
         }
     }
 };
@@ -258,9 +250,8 @@ let _unmatch = (orbs, row, col, match, skipToRandom = false, height, width) => {
   *         [ 3, 4, 1, 2 ],     to      [ 3, 4, 1, 2 ],    and then     [ 3, 4, 5, 2 ],
   *         [ 4, 1, 2, 3 ]              [ 5, 1, 2, 3 ]                  [ 5, 1, 2, 3 ]
   */
-export function unmatch(orbs, height, width, firstMatch) {
-    let intersections = [];
-    let match = firstMatch;
+export function unmatch(orbs: any[][], match: number[][]): any[][] {
+    let intersections: number[][] = [];
     // it is a simple match if all of the coords have only 1 rowCoord or 1 colCoord
     let [rowCoords, colCoords] = _.zip(...match);
     let isSimpleMatch = _.uniq(rowCoords).length === 1 || _.uniq(colCoords).length === 1;
@@ -271,7 +262,7 @@ export function unmatch(orbs, height, width, firstMatch) {
 
         // Checks for a side-by-side match, which could cause and endless loop.
         // In that case, the skipToRandom argument in _unmatch is triggered.
-        let midNeighbors;
+        let midNeighbors: any[];
         if (_.uniq(rowCoords).length === 1) {
             midNeighbors = [orbs[midRow][midCol - 1], orbs[midRow][midCol + 1]];
         } else {
@@ -279,11 +270,11 @@ export function unmatch(orbs, height, width, firstMatch) {
         }
         let isSideBySideMatch = _.includes(midNeighbors, orbs[midRow][midCol]);
 
-        _unmatch(orbs, ...match[median], match, isSideBySideMatch, height, width);
+        orbs = _unmatch(orbs, midRow, midCol, match, isSideBySideMatch);
     } else {
         // collects which rows and columns have matches in them
-        let matchRows = [];
-        let matchCols = [];
+        let matchRows: number[] = [];
+        let matchCols: number[] = [];
         _.each(_.countBy(rowCoords), (v, k) => {
             if (v > 2) {
                 matchRows.push(_.toInteger(k));
@@ -301,7 +292,8 @@ export function unmatch(orbs, height, width, firstMatch) {
             };
         });
         // chooses a random intersection to unmatch 
-        _unmatch(orbs, ..._.sample(intersections), match, height, width);
+        let [row, col] = _.sample(intersections);
+        _unmatch(orbs, row, col, match);
     };    
     return orbs;
 };
