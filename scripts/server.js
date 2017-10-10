@@ -5,7 +5,7 @@ const execSync = require('child_process').execSync;
 
 let browserSync = require('browser-sync').create();
 
-execSync('tsc; npm run browserify; node site/scripts/generateReadme.js; cp ./site/*.css ./site-gh-pages; cp ./site/*.html ./site-gh-pages', { stdio: [0, 1, 2] });
+execSync('mkdir -p site-gh-pages; tsc; npm run browserify; node site/scripts/generateReadme.js; cp ./site/*.css ./site-gh-pages; cp ./site/*.html ./site-gh-pages', { stdio: [0, 1, 2] });
 
 browserSync.init({
     server: 'site-gh-pages',
